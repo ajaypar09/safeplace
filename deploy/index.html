@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Safe Plate" />
+  <meta name="theme-color" content="#1a1f2e" />
+  <title>Safe Plate</title>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231a1f2e'/%3E%3Ctext x='90' y='115' font-size='80' text-anchor='middle'%3E🌿%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#1a1f2e; --bg2:#222840; --bg3:#2a3050; --card:#252b3d;
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+      --text:#f0ede8; --text2:#9a9fb8; --text3:#5c6280;
+      --green:#4ade80; --green-bg:rgba(74,222,128,0.12);
+      --red:#f87171; --red-bg:rgba(248,113,113,0.12);
+      --amber:#fbbf24; --amber-bg:rgba(251,191,36,0.12);
+      --accent:#6ee7b7; --radius:14px; --radius-sm:8px;
+      --sit:env(safe-area-inset-top,0px); --sib:env(safe-area-inset-bottom,0px);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased}
+    .app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:calc(var(--sit) + 20px) 18px calc(var(--sib) + 40px)}
+    .header{margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+    .header h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;letter-spacing:-0.5px;background:linear-gradient(135deg,#f0ede8 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .header p{font-size:13px;color:var(--text3);margin-top:2px}
+    .search-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+    .input-group{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+    .input-wrap{position:relative}
+    .input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+    input[type="text"]{width:100%;height:46px;padding:0 14px 0 40px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Nunito',sans-serif;font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+    input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(110,231,183,0.1)}
+    input::placeholder{color:var(--text3)}
+    .analyze-btn{width:100%;height:50px;background:linear-gradient(135deg,#34d399,#6ee7b7);border:none;border-radius:var(--radius-sm);color:#0d1117;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s}
+    .analyze-btn:active{transform:scale(0.98);opacity:.9}
+    .analyze-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+    .chips-label{font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+    .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:24px}
+    .chip{font-size:12px;font-family:'Nunito',sans-serif;padding:6px 12px;border:1px solid var(--border2);border-radius:99px;background:var(--card);color:var(--text2);cursor:pointer;font-weight:500}
+    .chip:active{background:var(--bg3);color:var(--text);border-color:var(--accent)}
+    .loading{display:none;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 20px;text-align:center;margin-bottom:16px}
+    .loading.show{display:block}
+    .spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading p{font-size:14px;color:var(--text2)}
+    .error-box{display:none;background:var(--red-bg);border:1px solid rgba(248,113,113,0.25);border-radius:var(--radius);padding:14px 16px;font-size:14px;color:var(--red);line-height:1.5;margin-bottom:16px}
+    .error-box.show{display:block}
+    .result{display:none;flex-direction:column;gap:12px;margin-bottom:16px}
+    .result.show{display:flex}
+    .result-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .result-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;line-height:1.2;margin-bottom:4px}
+    .result-meta{font-size:12px;color:var(--text3)}
+    .overall-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:99px;white-space:nowrap;flex-shrink:0;letter-spacing:.03em}
+    .badge-safe{background:var(--green-bg);color:var(--green)}
+    .badge-unsafe{background:var(--red-bg);color:var(--red)}
+    .badge-caution{background:var(--amber-bg);color:var(--amber)}
+    .badge-unknown{background:rgba(255,255,255,0.06);color:var(--text2)}
+    .checks-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .check-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+    .check-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px}
+    .check-verdict{font-size:14px;font-weight:700;margin-bottom:6px}
+    .v-safe{color:var(--green)} .v-unsafe{color:var(--red)} .v-caution{color:var(--amber)} .v-unknown{color:var(--text2)}
+    .check-note{font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:8px}
+    .mini-tags{display:flex;flex-wrap:wrap;gap:4px}
+    .mini-tag{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600}
+    .mini-tag.flagged{background:var(--red-bg);color:var(--red)}
+    .mini-tag.caution{background:var(--amber-bg);color:var(--amber)}
+    .summary-card,.ingredients-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+    .section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:10px}
+    .summary-text{font-size:14px;color:var(--text2);line-height:1.7}
+    .ing-tags{display:flex;flex-wrap:wrap;gap:5px}
+    .ing-tag{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-weight:500}
+    .ing-tag.flagged{background:var(--red-bg);border-color:rgba(248,113,113,0.25);color:var(--red)}
+    .ing-tag.caution{background:var(--amber-bg);border-color:rgba(251,191,36,0.25);color:var(--amber)}
+    .disclaimer{font-size:11px;color:var(--text3);line-height:1.6;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Safe Plate 🌿</h1>
+    <p>Gluten-free & celiac safety checker</p>
+  </div>
+  <div class="search-card">
+    <div class="input-group">
+      <div class="input-wrap">
+        <span class="input-icon">🍽️</span>
+        <input type="text" id="food" placeholder="Food item (e.g. Pad Thai)" />
+      </div>
+      <div class="input-wrap">
+        <span class="input-icon">📍</span>
+        <input type="text" id="restaurant" placeholder="Restaurant (e.g. PF Chang's)" />
+      </div>
+    </div>
+    <button class="analyze-btn" id="analyze-btn" onclick="analyze()">Analyze Dish</button>
+  </div>
+  <div class="chips-label">Try an example</div>
+  <div class="chips">
+    <span class="chip" onclick="fill('Big Mac','McDonald\'s')">🍔 Big Mac</span>
+    <span class="chip" onclick="fill('Burrito Bowl','Chipotle')">🌯 Chipotle Bowl</span>
+    <span class="chip" onclick="fill('Pad Thai','PF Chang\'s')">🍜 Pad Thai</span>
+    <span class="chip" onclick="fill('Pepperoni Pizza','Domino\'s')">🍕 Domino's Pizza</span>
+  </div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Searching the web for ingredients...</p>
+  </div>
+  <div class="error-box" id="error-box"></div>
+  <div class="result" id="result">
+    <div class="result-header">
+      <div>
+        <div class="result-title" id="res-title"></div>
+        <div class="result-meta" id="res-meta"></div>
+      </div>
+      <span class="overall-badge" id="res-badge"></span>
+    </div>
+    <div class="checks-grid">
+      <div class="check-card">
+        <div class="check-label">Gluten-Free</div>
+        <div class="check-verdict" id="gf-verdict"></div>
+        <div class="check-note" id="gf-note"></div>
+        <div class="mini-tags" id="gf-tags"></div>
+      </div>
+      <div class="check-card">
+        <div class="check-label">Celiac Safe</div>
+        <div class="check-verdict" id="cs-verdict"></div>
+        <div class="check-note" id="cs-note"></div>
+        <div class="mini-tags" id="cs-tags"></div>
+      </div>
+    </div>
+    <div class="summary-card" id="summary-card">
+      <div class="section-label">Recommendation</div>
+      <div class="summary-text" id="res-summary"></div>
+    </div>
+    <div class="ingredients-card" id="ingredients-card">
+      <div class="section-label">Ingredients</div>
+      <div class="ing-tags" id="res-ingredients"></div>
+    </div>
+    <div class="disclaimer">⚠️ <strong>Not medical advice.</strong> Always confirm with the restaurant directly if you have celiac disease.</div>
+  </div>
+</div>
+<script>
+  function fill(f,r){document.getElementById('food').value=f;document.getElementById('restaurant').value=r}
+  function vLabel(v){return{safe:'✓ Safe',unsafe:'✗ Not Safe',caution:'⚠ Caution',unknown:'? Unknown'}[v]||'? Unknown'}
+  function vClass(v){return{safe:'v-safe',unsafe:'v-unsafe',caution:'v-caution',unknown:'v-unknown'}[v]||'v-unknown'}
+  function bClass(v){return{safe:'badge-safe',unsafe:'badge-unsafe',caution:'badge-caution',unknown:'badge-unknown'}[v]||'badge-unknown'}
+
+  function renderResult(r){
+    const gf=r.gluten_free||{},cs=r.celiac_safe||{};
+    const unsafe=gf.verdict==='unsafe'||cs.verdict==='unsafe';
+    const safe=gf.verdict==='safe'&&cs.verdict==='safe';
+    const overall=unsafe?'unsafe':safe?'safe':'caution';
+    const label=unsafe?'Not Safe':safe?'Safe ✓':'Use Caution';
+    document.getElementById('res-title').textContent=r.item||'Unknown';
+    document.getElementById('res-meta').textContent=[r.restaurant!=='Unknown'?r.restaurant:null,r.data_source?'via '+r.data_source:null].filter(Boolean).join(' · ');
+    const b=document.getElementById('res-badge');b.textContent=label;b.className='overall-badge '+bClass(overall);
+    const gfV=document.getElementById('gf-verdict');gfV.textContent=vLabel(gf.verdict);gfV.className='check-verdict '+vClass(gf.verdict);
+    document.getElementById('gf-note').textContent=gf.explanation||'';
+    document.getElementById('gf-tags').innerHTML=(gf.flagged_ingredients||[]).map(i=>`<span class="mini-tag flagged">${i}</span>`).join('');
+    const csV=document.getElementById('cs-verdict');csV.textContent=vLabel(cs.verdict);csV.className='check-verdict '+vClass(cs.verdict);
+    document.getElementById('cs-note').textContent=cs.explanation||'';
+    document.getElementById('cs-tags').innerHTML=(cs.risks||[]).map(i=>`<span class="mini-tag caution">${i}</span>`).join('');
+    if(r.summary){document.getElementById('res-summary').textContent=r.summary;document.getElementById('summary-card').style.display='block'}else{document.getElementById('summary-card').style.display='none'}
+    const ings=r.all_ingredients||[];
+    if(ings.length){
+      const fl=(gf.flagged_ingredients||[]).map(s=>s.toLowerCase());
+      const ca=(r.caution_ingredients||[]).map(s=>s.toLowerCase());
+      document.getElementById('res-ingredients').innerHTML=ings.map(ing=>{const l=ing.toLowerCase();const f=fl.some(x=>l.includes(x)||x.includes(l));const c=!f&&ca.some(x=>l.includes(x)||x.includes(l));return`<span class="ing-tag ${f?'flagged':c?'caution':''}">${ing}</span>`}).join('');
+      document.getElementById('ingredients-card').style.display='block';
+    }else{document.getElementById('ingredients-card').style.display='none'}
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('result').classList.add('show');
+    document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  async function analyze(){
+    const food=document.getElementById('food').value.trim();
+    const rest=document.getElementById('restaurant').value.trim();
+    if(!food){document.getElementById('food').focus();return}
+    document.getElementById('error-box').classList.remove('show');
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('analyze-btn').disabled=true;
+    document.getElementById('analyze-btn').textContent='Analyzing...';
+    try{
+      const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({food,restaurant:rest})});
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error||`Error ${res.status}`);
+      renderResult(data);
+    }catch(err){
+      document.getElementById('loading').classList.remove('show');
+      const box=document.getElementById('error-box');
+      box.textContent='⚠️ '+(err.message||'Something went wrong. Please try again.');
+      box.classList.add('show');
+    }
+    document.getElementById('analyze-btn').disabled=false;
+    document.getElementById('analyze-btn').textContent='Analyze Dish';
+  }
+
+  ['food','restaurant'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')analyze()});
+  });
+</script>
+</body>
+</html>
