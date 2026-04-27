@@ -1,6 +1,6 @@
 [build]
-  publish = "."
-  functions = "netlify/functions"
+  publish = "deploy"
+  functions = "deploy/netlify/functions"
 
 [[redirects]]
   from = "/api/analyze"
